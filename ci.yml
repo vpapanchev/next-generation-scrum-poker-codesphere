@@ -1,55 +1,53 @@
-# Codesphere Landscape definition (schemaVersion v0.5).
+# Codesphere Landscape definition.
+#
+# Schema v0.2 on purpose: this installation's ci.yml parser rejects v0.5
+# (see CODESPHERE.md). The shape below mirrors a ci.yml that is known to work
+# on this instance: per-service routing via `isPublic` + `network.path`, small
+# `plan` ids, and no Workspace Router service.
 #
 # One Reactive service serves both the built frontend and the WebSocket
 # backend on port 3000, so everything runs on a single origin. State lives in
-# process memory (see backend/shared/database/store.ts), which is why there is
-# only one service and why replicas must stay at 1.
-#
-# Plan IDs are installation-specific. 20 (app) and 101 (router) are the IDs
-# used in the Codesphere docs fixtures; adjust them in the UI if your instance
-# uses different tiers.
+# process memory (see backend/shared/database/store.ts), which is why replicas
+# must stay at 1.
 
-schemaVersion: v0.5
+schemaVersion: v0.2
 
 prepare:
   steps:
+    # The Reactive base image ships Node, but keep the build independent of the
+    # installed version. Vite 8 needs Node >= 20.19.
+    - name: Ensure Node.js
+      command: |
+        NODE_MAJOR=$(node -v 2>/dev/null | sed 's/v\([0-9]*\).*/\1/')
+        if [ -z "$NODE_MAJOR" ] || [ "$NODE_MAJOR" -lt 20 ]; then
+          nix-env -iA nixpkgs.nodejs_22
+          hash -r
+        fi
+        node -v
     - name: Install dependencies
       command: npm ci
     - name: Build frontend
       # Empty API_URL makes the frontend connect to wss://<same-host>/ws at runtime.
       command: API_URL='' npm run build:frontend
 
+test:
+  steps: []
+
 run:
   scrum-poker:
-    plan: 20
+    plan: 8
     # WebSocket connections are tracked in process memory, so one replica only.
     replicas: 1
     steps:
       - name: Start scrum poker
         command: npm run start:codesphere
     healthEndpoint: http://127.0.0.1:3000/healthz
+    isPublic: true
     network:
-      ports: [3000]
+      path: /
+      stripPath: false
     env:
       NODE_ENV: production
-      PORT: 3000
+      PORT: '3000'
       STATIC_DIR: frontend/dist
-      EXPIRY_TIME_IN_HOUR: 16
-    volumeMounts:
-      - name: _workspace
-        mountPath: /home/user/app
-        workspacePath: ''
-
-  # Codesphere's Workspace Router receives all external traffic and forwards
-  # it to the app. Websocket upgrades are passed through as well.
-  cs-router:
-    type: router
-    plan: 101
-    replicaCount: 1
-    network:
-      isLandscapeGateway: true
-      paths:
-        - path: /
-          service: scrum-poker
-          port: 3000
-          stripPath: false
+      EXPIRY_TIME_IN_HOUR: '16'
