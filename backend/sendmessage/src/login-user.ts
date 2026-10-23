@@ -9,7 +9,7 @@ import { ConfigWithHandler } from '../../shared/types';
 import { EXPIRY_TIME_IN_HOUR } from './const';
 
 export const loginUser = async (userId: string, groupId: string, config: ConfigWithHandler) => {
-  const groupItem = await getGroup(groupId, config);
+  const groupItem = await getGroup(groupId);
   const groupUpdate = groupItem
     ? addConnectionToGroup(
         groupId,

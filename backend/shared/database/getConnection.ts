@@ -1,12 +1,10 @@
 import { Config, ConnectionItem } from '../types';
 import { getItem } from './getItem';
 
-export const getConnection = ({
+export const getConnection = async ({
   connectionId,
-  tableName,
-  ddb,
 }: Config): Promise<ConnectionItem | undefined> => {
-  const connection = getItem<ConnectionItem>('connectionId', connectionId, tableName, ddb);
+  const connection = await getItem<ConnectionItem>('connectionId', connectionId);
   if (!connection) {
     console.error('No connection found for connectionId', connectionId);
   }

@@ -1,24 +1,14 @@
-import { Config, GroupItem } from '../types';
+import { GroupConnections, GroupItem } from '../types';
+import { mutateItem } from './store';
 
 export const removeConnectionsFromGroup = async (
   groupId: string,
   removedUserIds: string[],
-  { ddb, tableName }: Config,
-): Promise<GroupItem> => {
-  const userIdAttributeNames = Object.fromEntries(
-    removedUserIds.map((userId, index) => [`#${index}`, userId]),
-  );
-  return (
-    await ddb.update({
-      TableName: tableName,
-      Key: {
-        primaryKey: `groupId:${groupId}`,
-      },
-      UpdateExpression: `REMOVE ${Object.keys(userIdAttributeNames)
-        .map((attributeName) => `connections.${attributeName}`)
-        .join(',')}`,
-      ExpressionAttributeNames: userIdAttributeNames,
-      ReturnValues: 'ALL_NEW',
-    })
-  ).Attributes as GroupItem;
-};
+): Promise<GroupItem> =>
+  mutateItem<GroupItem>(`groupId:${groupId}`, (item) => {
+    const connections = (item.connections as GroupConnections | undefined) ?? {};
+    for (const userId of removedUserIds) {
+      Reflect.deleteProperty(connections, userId);
+    }
+    item.connections = connections;
+  });

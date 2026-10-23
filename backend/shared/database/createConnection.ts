@@ -1,11 +1,9 @@
 import { Config } from '../types';
+import { writeItem } from './store';
 
-export const createConnection = async (ttl: number, { ddb, connectionId, tableName }: Config) =>
-  ddb.put({
-    TableName: tableName,
-    Item: {
-      primaryKey: `connectionId:${connectionId}`,
-      connectionId,
-      ttl,
-    },
+export const createConnection = async (ttl: number, { connectionId }: Config) =>
+  writeItem({
+    primaryKey: `connectionId:${connectionId}`,
+    connectionId,
+    ttl,
   });

@@ -1,19 +1,7 @@
-import { Config, GroupItem } from '../types';
+import { GroupItem } from '../types';
+import { mutateItem } from './store';
 
-export const revealGroupVotes = async (
-  groupId: string,
-  { tableName, ddb }: Config,
-): Promise<GroupItem> =>
-  (
-    await ddb.update({
-      TableName: tableName,
-      Key: {
-        primaryKey: `groupId:${groupId}`,
-      },
-      UpdateExpression: 'SET visible = :visibility',
-      ExpressionAttributeValues: {
-        ':visibility': true,
-      },
-      ReturnValues: 'ALL_NEW',
-    })
-  ).Attributes as GroupItem;
+export const revealGroupVotes = async (groupId: string): Promise<GroupItem> =>
+  mutateItem<GroupItem>(`groupId:${groupId}`, (item) => {
+    item.visible = true;
+  });

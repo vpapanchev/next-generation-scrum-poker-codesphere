@@ -1,9 +1,3 @@
-import { prepareTable } from './dynamo';
-import { startWebSocketServer } from './socket';
+import { startServer } from './server';
 
-const start = async () => {
-  await prepareTable();
-  startWebSocketServer();
-};
-
-start();
+startServer();

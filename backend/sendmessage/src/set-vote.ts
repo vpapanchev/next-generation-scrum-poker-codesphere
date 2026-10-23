@@ -10,6 +10,6 @@ export const setVote = async (vote: CardValue, config: ConfigWithHandler) => {
   const { groupId, userId } = connectionItem;
   if (!(groupId && userId)) return;
 
-  const updatedGroupItem = await setGroupConnectionVote(groupId, userId, vote, config);
+  const updatedGroupItem = await setGroupConnectionVote(groupId, userId, vote);
   await broadcastState(updatedGroupItem, config);
 };

@@ -1,9 +1,5 @@
 import { Config } from '../types';
+import { deleteItem } from './store';
 
-export const deleteConnection = ({ connectionId, tableName, ddb }: Config) =>
-  ddb.delete({
-    TableName: tableName,
-    Key: {
-      primaryKey: `connectionId:${connectionId}`,
-    },
-  });
+export const deleteConnection = async ({ connectionId }: Config) =>
+  deleteItem(`connectionId:${connectionId}`);

@@ -1,20 +1,14 @@
-import { Config, GroupItem } from '../types';
+import { GroupConnections, GroupItem } from '../types';
+import { mutateItem } from './store';
 
 export const removeConnectionFromGroup = async (
   userId: string,
   groupId: string,
-  { tableName, ddb }: Config,
 ): Promise<GroupItem> =>
-  (
-    await ddb.update({
-      TableName: tableName,
-      Key: {
-        primaryKey: `groupId:${groupId}`,
-      },
-      UpdateExpression: 'REMOVE connections.#1.connectionId',
-      ExpressionAttributeNames: {
-        '#1': userId,
-      },
-      ReturnValues: 'ALL_NEW',
-    })
-  ).Attributes as GroupItem;
+  mutateItem<GroupItem>(`groupId:${groupId}`, (item) => {
+    const connections = item.connections as GroupConnections | undefined;
+    const connection = connections?.[userId];
+    if (connection) {
+      delete connection.connectionId;
+    }
+  });

@@ -1,18 +1,12 @@
 import { Config } from '../types';
+import { mutateItem } from './store';
 
-export const addUserAndGroupToConnection = (
+export const addUserAndGroupToConnection = async (
   groupId: string,
   userId: string,
-  { ddb, tableName, connectionId }: Config,
+  { connectionId }: Config,
 ) =>
-  ddb.update({
-    TableName: tableName,
-    Key: {
-      primaryKey: `connectionId:${connectionId}`,
-    },
-    UpdateExpression: 'set userId = :userId, groupId = :groupId',
-    ExpressionAttributeValues: {
-      ':userId': userId,
-      ':groupId': groupId,
-    },
+  mutateItem(`connectionId:${connectionId}`, (item) => {
+    item.userId = userId;
+    item.groupId = groupId;
   });

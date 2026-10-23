@@ -5,7 +5,9 @@ import { CardValue } from '../../shared/cards';
 export interface Config {
   connectionId: string;
   tableName: string;
-  ddb: DynamoDBDocument;
+  // Only used by the AWS Lambda handlers. The Codesphere PoC keeps state in
+  // process memory, so the local server does not provide a DynamoDB client.
+  ddb?: DynamoDBDocument;
 }
 
 export interface ConfigWithHandler extends Config {

@@ -1,0 +1,55 @@
+# Codesphere Landscape definition (schemaVersion v0.5).
+#
+# One Reactive service serves both the built frontend and the WebSocket
+# backend on port 3000, so everything runs on a single origin. State lives in
+# process memory (see backend/shared/database/store.ts), which is why there is
+# only one service and why replicas must stay at 1.
+#
+# Plan IDs are installation-specific. 20 (app) and 101 (router) are the IDs
+# used in the Codesphere docs fixtures; adjust them in the UI if your instance
+# uses different tiers.
+
+schemaVersion: v0.5
+
+prepare:
+  steps:
+    - name: Install dependencies
+      command: npm ci
+    - name: Build frontend
+      # Empty API_URL makes the frontend connect to wss://<same-host>/ws at runtime.
+      command: API_URL='' npm run build:frontend
+
+run:
+  scrum-poker:
+    plan: 20
+    # WebSocket connections are tracked in process memory, so one replica only.
+    replicas: 1
+    steps:
+      - name: Start scrum poker
+        command: npm run start:codesphere
+    healthEndpoint: http://127.0.0.1:3000/healthz
+    network:
+      ports: [3000]
+    env:
+      NODE_ENV: production
+      PORT: 3000
+      STATIC_DIR: frontend/dist
+      EXPIRY_TIME_IN_HOUR: 16
+    volumeMounts:
+      - name: _workspace
+        mountPath: /home/user/app
+        workspacePath: ''
+
+  # Codesphere's Workspace Router receives all external traffic and forwards
+  # it to the app. Websocket upgrades are passed through as well.
+  cs-router:
+    type: router
+    plan: 101
+    replicaCount: 1
+    network:
+      isLandscapeGateway: true
+      paths:
+        - path: /
+          service: scrum-poker
+          port: 3000
+          stripPath: false

@@ -1,25 +1,14 @@
 import { CardValue } from '../../../shared/cards';
-import { Config, GroupItem } from '../types';
+import { GroupConnections, GroupItem } from '../types';
+import { mutateItem } from './store';
 
 export const setGroupConnectionVote = async (
   groupId: string,
   userId: string,
   vote: CardValue,
-  { ddb, tableName }: Config,
 ): Promise<GroupItem> =>
-  (
-    await ddb.update({
-      TableName: tableName,
-      Key: {
-        primaryKey: `groupId:${groupId}`,
-      },
-      UpdateExpression: `SET connections.#userId.vote = :vote`,
-      ExpressionAttributeNames: {
-        '#userId': userId,
-      },
-      ExpressionAttributeValues: {
-        ':vote': vote,
-      },
-      ReturnValues: 'ALL_NEW',
-    })
-  ).Attributes as GroupItem;
+  mutateItem<GroupItem>(`groupId:${groupId}`, (item) => {
+    const connections = (item.connections as GroupConnections | undefined) ?? {};
+    connections[userId] = { ...connections[userId], vote };
+    item.connections = connections;
+  });

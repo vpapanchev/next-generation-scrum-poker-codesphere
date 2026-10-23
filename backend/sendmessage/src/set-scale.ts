@@ -10,9 +10,9 @@ export const setScale = async (scale: CardValue[], config: ConfigWithHandler): P
   if (!connectionItem) return;
   const { groupId } = connectionItem;
   if (!groupId) return;
-  const groupItem = await getGroup(groupId, config);
+  const groupItem = await getGroup(groupId);
   if (!groupItem) return;
 
-  const updatedGroupItem = await resetGroupVotes(groupId, groupItem.connections, scale, config);
+  const updatedGroupItem = await resetGroupVotes(groupId, scale);
   await broadcastState(updatedGroupItem, config);
 };

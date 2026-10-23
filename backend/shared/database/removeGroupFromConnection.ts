@@ -1,10 +1,8 @@
 import { Config } from '../types';
+import { mutateItem } from './store';
 
-export const removeGroupFromConnection = ({ ddb, tableName, connectionId }: Config) =>
-  ddb.update({
-    TableName: tableName,
-    Key: {
-      primaryKey: `connectionId:${connectionId}`,
-    },
-    UpdateExpression: `REMOVE userId, groupId`,
+export const removeGroupFromConnection = async ({ connectionId }: Config) =>
+  mutateItem(`connectionId:${connectionId}`, (item) => {
+    delete item.userId;
+    delete item.groupId;
   });

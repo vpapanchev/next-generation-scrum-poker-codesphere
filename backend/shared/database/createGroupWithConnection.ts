@@ -1,12 +1,13 @@
 import { VOTE_NOTE_VOTED } from '../../../shared/cards';
 import { SCALES } from '../../../shared/scales';
 import { Config, GroupItem } from '../types';
+import { StoredItem, writeItem } from './store';
 
 export const createGroupWithConnection = async (
   groupId: string,
   userId: string,
   ttl: number,
-  { ddb, tableName, connectionId }: Config,
+  { connectionId }: Config,
 ): Promise<GroupItem> => {
   const groupItem: GroupItem & { primaryKey: string } = {
     primaryKey: `groupId:${groupId}`,
@@ -18,9 +19,6 @@ export const createGroupWithConnection = async (
     scale: SCALES.COHEN_SCALE.values,
     visible: false,
   };
-  await ddb.put({
-    TableName: tableName,
-    Item: groupItem,
-  });
+  writeItem(groupItem as unknown as StoredItem);
   return groupItem;
 };

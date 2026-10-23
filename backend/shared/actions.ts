@@ -71,7 +71,7 @@ export const removeConnection = async (config: ConfigWithHandler): Promise<unkno
 
   const { groupId, userId } = connectionItem;
   const [groupItem] = await Promise.all([
-    userId && groupId && removeConnectionFromGroup(userId, groupId, config),
+    userId && groupId && removeConnectionFromGroup(userId, groupId),
     deleteConnection(config),
   ]);
 

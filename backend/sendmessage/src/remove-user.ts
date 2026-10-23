@@ -10,13 +10,13 @@ export const removeUser = async (user: string, config: ConfigWithHandler): Promi
   if (!connectionItem) return;
   const { groupId, userId } = connectionItem;
   if (!groupId) return;
-  const groupItem = await getGroup(groupId, config);
+  const groupItem = await getGroup(groupId);
   if (!groupItem) return;
   const { connections } = groupItem;
   if (user in connections) {
     const userConnectionId = connections[user].connectionId;
     const [updatedGroupItem] = await Promise.all([
-      removeConnectionsFromGroup(groupId, [user], config),
+      removeConnectionsFromGroup(groupId, [user]),
       userConnectionId &&
         removeGroupFromConnection({
           ...config,
