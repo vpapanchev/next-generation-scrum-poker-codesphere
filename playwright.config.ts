@@ -43,14 +43,9 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'npm run start:local-backend:db',
-      port: 8000,
-      reuseExistingServer: !process.env.CI,
-    },
-    {
       command: process.env.CI
         ? 'npm run start:local-backend:gateway:ci'
-        : 'npm run start:local-backend:gateway',
+        : 'npm run start:local-backend',
       port: 8080,
       reuseExistingServer: !process.env.CI,
     },

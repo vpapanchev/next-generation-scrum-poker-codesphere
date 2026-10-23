@@ -2,15 +2,30 @@
 
 Prototype for a new Scrum Poker
 
+## Why this fork exists
+
+This repository is a fork of [tng/next-generation-scrum-poker](https://github.com/tng/next-generation-scrum-poker),
+used as a proof of concept for running the app on [Codesphere](https://codesphere.com).
+It is not intended to be merged back upstream.
+
+Upstream deploys to AWS (API Gateway WebSocket + Lambda + DynamoDB). This fork
+replaces that with a single Node process that fits a Codesphere landscape: one
+HTTP server serves the built frontend and the WebSocket endpoint on the same
+origin, and application state lives in process memory instead of DynamoDB.
+
+- `ci.yml` — the Codesphere landscape definition
+- [`CODESPHERE.md`](CODESPHERE.md) — what changed, how to deploy, known limits
+
 ## Development
 
-You need a running [docker](https://docs.docker.com/get-docker/) daemon for local development. To test and develop backend and frontend, run
+To test and develop backend and frontend, run
 
 ```shell
 npm start
 ```
 
-This will spin up the database via `docker` and launch the local API gateway.
+This launches the local WebSocket gateway on port 8080. State is kept in memory,
+so no database or Docker daemon is needed.
 
 In parallel, it will use [Vite](https://vitejs.dev) to serve your app on [http://localhost:5175](http://localhost:5175). Vite will automatically update the browser via hot module reloading on save while providing extremely fast rebuilds.
 
@@ -56,7 +71,7 @@ To run all E2E tests via [Playwright](https://playwright.dev), install playwrigh
 npm run e2e
 ```
 
-Note that this will download a docker image on first run, which may lead to a test timeout. Subsequent runs should work without problems though. If the dev environment is already running, then the tests will reuse it. To work on single E2E tests, run
+The tests start the local backend and frontend automatically; if they are already running, Playwright reuses them. Work on single E2E tests with
 
 ```shell
 npm run e2e:ui
